@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Item Request · Restaurant Bridge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.dataset.theme='light'</script>
+</head>
+<body data-page="request">
+<section id="app">
+  <aside class="side" id="side">
+    <div class="side-brand">
+      <svg class="mark" viewBox="0 0 52 52" aria-hidden="true"><rect width="52" height="52" rx="14" fill="#1f7a68"/><path d="M13 36V18l13 11 13-11v18" stroke="#ffffff" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="41" cy="40" r="3.5" fill="#e0aa4a"/></svg>
+      <b>MARKEST<span>.</span></b>
+    </div>
+    <div class="side-label">Menu</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">2026 © Powered by Evincible Solutions</div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+      <div><h2>Restaurant Bridge</h2><div class="wh">Warehouse: <b>JED-WH</b></div></div>
+      <div class="top-right">
+        <div style="position:relative">
+          <button class="user" id="userBtn"><span class="avatar">MR</span><span class="uname">Maryam Rehman</span></button>
+          <div class="user-menu" id="userMenu" hidden><button id="logoutBtn">Sign out</button></div>
+        </div>
+      </div>
+    </header>
+    <main class="content" id="view"></main>
+  </div>
+</section>
+<div id="layer"></div>
+<script src="app.js"></script>
+</body>
+</html>

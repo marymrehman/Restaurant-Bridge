@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Restaurant Bridge · Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.dataset.theme='light'</script>
+</head>
+<body>
+<section id="login">
+  <div class="hero" aria-hidden="true">
+    <svg viewBox="0 0 900 700" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7ead8"/><stop offset=".6" stop-color="#f1dcc2"/><stop offset="1" stop-color="#e6c8a6"/></linearGradient>
+        <radialGradient id="glow" r=".5"><stop offset="0" stop-color="#fff3d6" stop-opacity=".9"/><stop offset=".35" stop-color="#ffe2a8" stop-opacity=".3"/><stop offset="1" stop-color="#ff9a3d" stop-opacity="0"/></radialGradient>
+        <radialGradient id="bok" r=".5"><stop offset="0" stop-color="#ffe0a3" stop-opacity=".55"/><stop offset="1" stop-color="#ffe0a3" stop-opacity="0"/></radialGradient>
+        <linearGradient id="win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3f2"/><stop offset="1" stop-color="#eef7f2"/></linearGradient>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9b48a"/><stop offset="1" stop-color="#b98a5e"/></linearGradient>
+        <linearGradient id="table" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ece4d8"/></linearGradient>
+        <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#7a4a2a" stop-opacity=".12"/></linearGradient>
+      </defs>
+      <rect width="900" height="700" fill="url(#wall)"/>
+      <!-- arched windows -->
+      <g opacity=".9">
+        <path d="M70 420V200a75 75 0 0 1 150 0v220z" fill="url(#win)"/>
+        <path d="M290 420V200a75 75 0 0 1 150 0v220z" fill="url(#win)"/>
+        <path d="M510 420V200a75 75 0 0 1 150 0v220z" fill="url(#win)"/>
+        <path d="M730 420V200a75 75 0 0 1 150 0v220z" fill="url(#win)"/>
+        <g stroke="#ffffff" stroke-width="7" fill="none">
+          <path d="M145 125v295M70 290h150M365 125v295M290 290h150M585 125v295M510 290h150M805 125v295M730 290h150"/>
+        </g>
+        <g fill="#ffffff" opacity="0"><circle cx="110" cy="250" r="2"/><circle cx="190" cy="230" r="1.5"/><circle cx="330" cy="260" r="2"/><circle cx="410" cy="220" r="1.5"/><circle cx="560" cy="240" r="2"/><circle cx="630" cy="270" r="1.5"/><circle cx="770" cy="250" r="2"/><circle cx="850" cy="225" r="1.5"/></g>
+      </g>
+      <!-- bar shelf with bottles -->
+      <rect x="0" y="420" width="900" height="16" fill="#a8774f"/>
+      <g>
+        <rect x="40" y="384" width="12" height="36" rx="3" fill="#2f6b4f"/><rect x="58" y="378" width="12" height="42" rx="3" fill="#7a2b2b"/><rect x="76" y="390" width="12" height="30" rx="3" fill="#c48a2c"/>
+        <rect x="250" y="382" width="12" height="38" rx="3" fill="#3a4e7a"/><rect x="268" y="388" width="12" height="32" rx="3" fill="#2f6b4f"/>
+        <rect x="470" y="380" width="12" height="40" rx="3" fill="#7a2b2b"/><rect x="488" y="388" width="12" height="32" rx="3" fill="#c48a2c"/><rect x="506" y="384" width="12" height="36" rx="3" fill="#2f6b4f"/>
+        <rect x="690" y="382" width="12" height="38" rx="3" fill="#c48a2c"/><rect x="708" y="386" width="12" height="34" rx="3" fill="#3a4e7a"/>
+      </g>
+      <!-- plants -->
+      <g>
+        <rect x="18" y="380" width="30" height="40" rx="4" fill="#c8794a"/><g fill="#4f9a6b"><ellipse cx="33" cy="360" rx="12" ry="26"/><ellipse cx="20" cy="368" rx="9" ry="20" transform="rotate(-25 20 368)"/><ellipse cx="46" cy="368" rx="9" ry="20" transform="rotate(25 46 368)"/></g>
+        <rect x="852" y="380" width="30" height="40" rx="4" fill="#c8794a"/><g fill="#3f8a5c"><ellipse cx="867" cy="360" rx="12" ry="26"/><ellipse cx="854" cy="368" rx="9" ry="20" transform="rotate(-25 854 368)"/><ellipse cx="880" cy="368" rx="9" ry="20" transform="rotate(25 880 368)"/></g>
+      </g>
+      <!-- floor -->
+      <rect x="0" y="436" width="900" height="264" fill="url(#floor)"/>
+      <g stroke="#a97c55" stroke-width="2" opacity=".35"><path d="M0 500H900M0 560H900M0 630H900"/><path d="M450 436 200 700M450 436 700 700M450 436 0 640M450 436 900 640"/></g>
+      <!-- pendant lamps -->
+      <g>
+        <path d="M180 0v120M450 0v90M720 0v120" stroke="#7b5a43" stroke-width="2"/>
+        <circle cx="180" cy="145" r="170" fill="url(#glow)"/><circle cx="450" cy="115" r="190" fill="url(#glow)"/><circle cx="720" cy="145" r="170" fill="url(#glow)"/>
+        <path d="M150 145a30 26 0 0 1 60 0z" fill="#2f7d6b"/><ellipse cx="180" cy="146" rx="22" ry="5" fill="#ffe7b0"/>
+        <path d="M415 115a35 30 0 0 1 70 0z" fill="#2f7d6b"/><ellipse cx="450" cy="116" rx="26" ry="6" fill="#ffe7b0"/>
+        <path d="M690 145a30 26 0 0 1 60 0z" fill="#2f7d6b"/><ellipse cx="720" cy="146" rx="22" ry="5" fill="#ffe7b0"/>
+      </g>
+      <!-- tables & chairs -->
+      <g>
+        <!-- left table -->
+        <g transform="translate(180 520)">
+          <path d="M-70 -22h-14v80M70 -22h14v80" stroke="#8a5a3b" stroke-width="7" fill="none"/>
+          <path d="M-96 -70q0-20 18-20v68h-18zM96 -70q0-20-18-20v68h18z" fill="#8a5a3b"/>
+          <ellipse cx="0" cy="0" rx="110" ry="26" fill="url(#table)"/>
+          <rect x="-5" y="20" width="10" height="70" fill="#8a5a3b"/>
+          <ellipse cx="-38" cy="-3" rx="24" ry="7" fill="#fff"/><ellipse cx="-38" cy="-4" rx="12" ry="3.5" fill="#d9783f"/>
+          <ellipse cx="40" cy="2" rx="24" ry="7" fill="#fff"/><ellipse cx="40" cy="1" rx="12" ry="3.5" fill="#6aa357"/>
+          <path d="M6 -26v-18l-6-10h12l-6 10" stroke="#f0e6d6" stroke-width="2" fill="none"/><path d="M1 -52h10l-5 8z" fill="#8a1f2a"/>
+          <rect x="-12" y="-20" width="8" height="16" rx="2" fill="#fff8e6"/><circle cx="-8" cy="-23" r="3" fill="#ffcf6a"/>
+        </g>
+        <!-- center table -->
+        <g transform="translate(470 590)">
+          <path d="M-100 -26h-16v100M100 -26h16v100" stroke="#7a4e33" stroke-width="8" fill="none"/>
+          <path d="M-130 -84q0-24 22-24v82h-22zM130 -84q0-24-22-24v82h22z" fill="#7a4e33"/>
+          <ellipse cx="0" cy="0" rx="150" ry="34" fill="url(#table)"/>
+          <rect x="-6" y="28" width="12" height="90" fill="#7a4e33"/>
+          <ellipse cx="-58" cy="-2" rx="32" ry="9" fill="#fff"/><ellipse cx="-58" cy="-3" rx="17" ry="5" fill="#c9502e"/><circle cx="-62" cy="-5" r="3" fill="#7fbf5a"/>
+          <ellipse cx="58" cy="4" rx="32" ry="9" fill="#fff"/><ellipse cx="58" cy="3" rx="17" ry="5" fill="#e3b04b"/>
+          <path d="M-8 -30v-24l-8-12h16l-8 12M18 -24v-24l-8-12h16l-8 12" stroke="#f0e6d6" stroke-width="2.2" fill="none"/>
+          <path d="M-14 -64h12l-6 9zM12 -58h12l-6 9z" fill="#8a1f2a"/>
+          <rect x="-3" y="-16" width="10" height="20" rx="2" fill="#fff8e6"/><circle cx="2" cy="-20" r="4" fill="#ffcf6a"/><circle cx="2" cy="-20" r="14" fill="url(#bok)"/>
+        </g>
+        <!-- right table -->
+        <g transform="translate(740 520)">
+          <path d="M-70 -22h-14v80M70 -22h14v80" stroke="#8a5a3b" stroke-width="7" fill="none"/>
+          <path d="M-96 -70q0-20 18-20v68h-18zM96 -70q0-20-18-20v68h18z" fill="#8a5a3b"/>
+          <ellipse cx="0" cy="0" rx="110" ry="26" fill="url(#table)"/>
+          <rect x="-5" y="20" width="10" height="70" fill="#8a5a3b"/>
+          <ellipse cx="-36" cy="0" rx="24" ry="7" fill="#fff"/><ellipse cx="-36" cy="-1" rx="12" ry="3.5" fill="#b8452c"/>
+          <ellipse cx="38" cy="-2" rx="24" ry="7" fill="#fff"/><ellipse cx="38" cy="-3" rx="12" ry="3.5" fill="#e9c46a"/>
+          <rect x="-4" y="-22" width="8" height="16" rx="2" fill="#fff8e6"/><circle cx="0" cy="-25" r="3" fill="#ffcf6a"/>
+        </g>
+      </g>
+      <!-- bokeh -->
+      <g><circle cx="90" cy="80" r="40" fill="url(#bok)"/><circle cx="320" cy="60" r="28" fill="url(#bok)"/><circle cx="600" cy="50" r="34" fill="url(#bok)"/><circle cx="840" cy="90" r="44" fill="url(#bok)"/><circle cx="560" cy="330" r="26" fill="url(#bok)"/><circle cx="260" cy="350" r="22" fill="url(#bok)"/></g>
+      <rect width="900" height="700" fill="url(#shade)"/>
+    </svg>
+  </div>
+
+  <div class="login-side">
+    <form class="login-box" id="loginForm" novalidate>
+      <div class="brand-lockup">
+        <div class="wordmark">
+          <svg class="mark" viewBox="0 0 52 52" aria-hidden="true"><rect width="52" height="52" rx="14" fill="#1f7a68"/><path d="M13 36V18l13 11 13-11v18" stroke="#ffffff" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="41" cy="40" r="3.5" fill="#e0aa4a"/></svg>
+          <span>MARKEST<span class="dot">.</span></span>
+        </div>
+        <div class="sub-brand">Restaurant Bridge</div>
+      </div>
+      <div class="field"><label for="u">Username</label><input class="input" id="u" autocomplete="username" value="EVS"></div>
+      <div class="field"><label for="p">Password</label><input class="input" id="p" type="password" autocomplete="current-password" placeholder="Enter your password"></div>
+      <div class="login-err" id="loginErr" role="alert"></div>
+      <button type="button" class="forgot" id="forgotBtn">Forgot Password?</button>
+      <button class="btn-primary" type="submit">Sign In</button>
+      <div class="login-foot">Demo build · any password works · 2026 © Powered by Evincible Solutions</div>
+    </form>
+  </div>
+</section>
+<script>
+const $=s=>document.querySelector(s);
+try{if(localStorage.getItem('rb-auth')==='1')location.replace('dashboard.html')}catch(e){}
+$('#forgotBtn').onclick=()=>{$('#loginErr').style.color='var(--muted)';$('#loginErr').textContent='Ask your Markest administrator to reset your password.'};
+$('#loginForm').addEventListener('submit',e=>{e.preventDefault();const u=$('#u').value.trim(),p=$('#p').value,err=$('#loginErr');err.style.color='';
+  if(!u){err.textContent='Enter your username.';$('#u').focus();return}
+  if(!p){err.textContent='Enter your password.';$('#p').focus();return}
+  try{localStorage.setItem('rb-auth','1')}catch(e){}
+  location.href='dashboard.html'});
+</script>
+</body>
+</html>
