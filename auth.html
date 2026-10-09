@@ -4,9 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Signing in · Restaurant Bridge</title>
-<style>body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f7f4;color:#18202f;display:grid;place-items:center;height:100vh}</style>
+<style>body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f7f4;color:#18202f;display:grid;place-items:center;height:100vh;padding:0 16px;text-align:center}</style>
 </head>
 <body>
-<p>Signing in to F&amp;O… this window will close by itself.</p>
+<p id="msg">Signing in to F&amp;O…</p>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+<script>
+/* In a popup, MSAL in the main window reads the result itself, so this page does nothing.
+   After a full-page redirect sign-in, finish it here and go back to Templates. */
+if (!window.opener && window.msal) {
+  var app = new msal.PublicClientApplication({
+    auth: { clientId: '7cca2278-8039-4a6a-8e85-4eaa5deba75e',
+            authority: 'https://login.microsoftonline.com/4661aaa7-3476-4224-9d3d-ca650e868c0a',
+            redirectUri: new URL('auth.html', location.href).href },
+    cache: { cacheLocation: 'localStorage' }
+  });
+  app.handleRedirectPromise()
+    .then(function () { location.replace('templates.html'); })
+    .catch(function (e) { document.getElementById('msg').textContent = 'Sign-in did not finish: ' + e.message; });
+} else if (window.opener) {
+  document.getElementById('msg').textContent = 'Signing in to F&O… this window will close by itself.';
+}
+</script>
 </body>
 </html>

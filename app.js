@@ -447,8 +447,15 @@ async function fnoToken(interactive){
   const account=fnoAccount();
   if(account){try{return (await app.acquireTokenSilent({scopes:fnoScopes(),account})).accessToken}catch(e){if(!interactive)throw e}}
   if(!interactive)throw new Error('Sign in to F&O first');
-  const r=await app.acquireTokenPopup({scopes:fnoScopes(),prompt:'select_account'});
-  return r.accessToken;
+  try{const r=await app.acquireTokenPopup({scopes:fnoScopes(),prompt:'select_account'});return r.accessToken}
+  catch(e){
+    /* popup blocked: sign in with a full-page redirect instead (auth.html finishes it and returns to Templates) */
+    if(/popup_window_error|empty_window_error|popup/i.test((e.errorCode||'')+' '+e.message)){
+      await app.acquireTokenRedirect({scopes:fnoScopes(),prompt:'select_account'});
+      return new Promise(()=>{});
+    }
+    throw e;
+  }
 }
 async function fnoFetch(path,opt={},interactive=false){
   const tok=await fnoToken(interactive);
