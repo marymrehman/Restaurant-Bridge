@@ -177,6 +177,7 @@ let COUNTING=[
  {jn:'CJ-000116',date:'2026-09-18',by:'Sara Al-Harbi',lines:[{no:'ITM-50001',sys:180,qty:182},{no:'ITM-50003',sys:36,qty:36},{no:'ITM-50007',sys:95,qty:95}]},
 ];
 
+const DEMO_TEMPLATES=JSON.parse(JSON.stringify(TEMPLATES));
 /* ---- persisted demo state (per browser) ---- */
 const SKEY='rb-state-v2';
 function saveState(){try{localStorage.setItem(SKEY,JSON.stringify({TRANSFERS,TEMPLATES,WASTAGE,COUNTING,stock:ITEMS.map(i=>i.stock)}))}catch(e){}}
@@ -285,8 +286,7 @@ function transferCols({showShip=false,hideFrom=false,hideTo=false}={}){return [
 const STATUS_CHIPS=['All','Requested','Shipped','Received'];
 V.request=()=>{
   const el=pageEl();
-  el.innerHTML=`<div class="page-head"><div><h1>Item Request</h1><p>Transfer requests between warehouses and branches. Ship requests made from JED-WH, and receive anything that has been shipped.</p></div>
-   <div class="actions"><button class="btn brass" data-go="shipment">${ico('ship')}Shipping</button><button class="btn brass" data-go="receiving">${ico('recv')}Receiving</button><button class="btn solid" id="newReq">${ico('plus')}New item request</button></div></div>
+  el.innerHTML=`<div class="page-head"><div><h1>Item Request</h1><p>Transfer requests between warehouses and branches. Ship requests made from JED-WH, and receive anything that has been shipped.</p></div></div>
    <div class="panel" id="reqT"><div class="panel-head"><h3>Transfer requests</h3><span class="hint">Click a row to see its item list</span></div></div>
    <div class="panel" id="catT"><div class="panel-head"><h3>Item list</h3><span class="hint">Stock on hand at JED-WH</span></div></div>`;
   const t=dataTable({id:'req',rows:()=>TRANSFERS,searchKeys:t=>t.tr+t.name+t.from+t.to+(t.ship?.no||'')+t.items.map(x=>byNo[x.no].name).join(' '),onRow:showTransfer,cols:transferCols()});
@@ -297,7 +297,6 @@ V.request=()=>{
     {h:'Unit of measurement',v:i=>i.unit},{h:'On hand',r:1,v:stockCell,sort:i=>i.stock/i.par}]});
   c.querySelector('.toolbar').appendChild(chipsFilter(c,['All',...Object.keys(CATS)],(i,v)=>i.cat===v));
   el.querySelector('#catT').appendChild(c);
-  el.querySelector('#newReq').onclick=newRequest;
   return el;
 };
 function newRequest(){
@@ -321,7 +320,7 @@ function newRequest(){
 /* ================= Transfer Shipment ================= */
 V.shipment=()=>{
   const el=pageEl();
-  el.innerHTML=`<div class="page-head"><div><h1>Transfer Shipment</h1><p>Ship requested items out of JED-WH, or create a direct shipment.</p></div><div class="actions"><button class="btn brass" data-go="receiving">${ico('recv')}Receiving</button><button class="btn solid" id="shNew">${ico('plus')}Create shipment</button></div></div>
+  el.innerHTML=`<div class="page-head"><div><h1>Transfer Shipment</h1><p>Ship requested items out of JED-WH and track what has been shipped.</p></div></div>
   <div class="panel" id="shR"><div class="panel-head"><h3>Requests ready to ship</h3><span class="hint">Requested from JED-WH</span></div></div>
   <div class="panel" id="shL"><div class="panel-head"><h3>Shipments</h3><span class="hint">Everything shipped from JED-WH</span></div></div>`;
   const r=dataTable({id:'shr',pageSize:6,rows:()=>TRANSFERS.filter(t=>t.status==='Requested'&&t.from===ME),searchKeys:t=>t.tr+t.name+t.to,onRow:showTransfer,emptyTitle:'Nothing waiting to ship',emptyText:'New requests from JED-WH will show here.',cols:transferCols({hideFrom:true})});
@@ -329,7 +328,6 @@ V.shipment=()=>{
   const s=dataTable({id:'shl',rows:()=>TRANSFERS.filter(t=>t.ship&&t.from===ME),searchKeys:t=>t.tr+t.ship.no+t.name+t.to,onRow:showTransfer,cols:transferCols({showShip:true,hideFrom:true})});
   s.querySelector('.toolbar').appendChild(chipsFilter(s,['All','Shipped','Received'],(x,v)=>x.status===v));
   el.querySelector('#shL').appendChild(s);
-  el.querySelector('#shNew').onclick=newShipment;
   return el;
 };
 function newShipment(){
@@ -349,7 +347,7 @@ function newShipment(){
 /* ================= Transfer Receiving ================= */
 V.receiving=()=>{
   const el=pageEl();
-  el.innerHTML=`<div class="page-head"><div><h1>Transfer Receiving</h1><p>Shipments sent to JED-WH. Receive them to add the items to stock.</p></div><div class="actions"><button class="btn brass" data-go="shipment">${ico('ship')}Shipping</button><button class="btn brass" data-go="request">${ico('req')}Item requests</button></div></div>
+  el.innerHTML=`<div class="page-head"><div><h1>Transfer Receiving</h1><p>Shipments sent to JED-WH. Receive them to add the items to stock.</p></div></div>
   <div class="panel" id="rT"><div class="panel-head"><h3>Incoming shipments</h3><span class="hint">Click a row to see its item list</span></div></div>`;
   const t=dataTable({id:'rcv',rows:()=>TRANSFERS.filter(t=>t.ship&&t.to===ME),searchKeys:t=>t.tr+t.ship.no+t.from+t.items.map(x=>byNo[x.no].name).join(' '),onRow:showTransfer,emptyTitle:'No shipments yet',cols:transferCols({showShip:true,hideTo:true})});
   t.querySelector('.toolbar').appendChild(chipsFilter(t,['All','Shipped','Received'],(x,v)=>x.status===v));
@@ -422,13 +420,90 @@ function newCount(){
     lines.forEach(x=>byNo[x.no].stock=x.qty);m.close();toast(`${jn} posted`);go(cur)};
 }
 
+
+/* ================= F&O connection (templates) ================= */
+/* Fill in clientId and tenantId from the Entra ID app registration to switch the Templates page to live F&O data. */
+const FNO={
+  url:'https://train-fosub2213d0d25b107d779devaos.axcloud.dynamics.com',
+  company:'usmf',
+  clientId:'7cca2278-8039-4a6a-8e85-4eaa5deba75e',
+  tenantId:'4661aaa7-3476-4224-9d3d-ca650e868c0a'
+};
+const fnoConfigured=()=>!!(FNO.clientId&&FNO.tenantId);
+let msalApp=null,msalReady=null,fnoState=fnoConfigured()?'signedout':'off',fnoError='';
+function fnoMsal(){
+  if(!fnoConfigured()||!window.msal)return null;
+  if(!msalApp){
+    msalApp=new msal.PublicClientApplication({auth:{clientId:FNO.clientId,authority:'https://login.microsoftonline.com/'+FNO.tenantId,redirectUri:new URL('auth.html',location.href).href},cache:{cacheLocation:'localStorage'}});
+    msalReady=Promise.resolve();
+  }
+  return msalApp;
+}
+const fnoScopes=()=>[FNO.url+'/.default'];
+const fnoAccount=()=>{const a=fnoMsal();return a&&a.getAllAccounts()[0]||null};
+async function fnoToken(interactive){
+  const app=fnoMsal();if(!app)throw new Error('F&O connection is not configured');
+  await msalReady;
+  const account=fnoAccount();
+  if(account){try{return (await app.acquireTokenSilent({scopes:fnoScopes(),account})).accessToken}catch(e){if(!interactive)throw e}}
+  if(!interactive)throw new Error('Sign in to F&O first');
+  const r=await app.acquireTokenPopup({scopes:fnoScopes(),prompt:'select_account'});
+  return r.accessToken;
+}
+async function fnoFetch(path,opt={},interactive=false){
+  const tok=await fnoToken(interactive);
+  const r=await fetch(FNO.url+'/data/'+path,{...opt,headers:{Authorization:'Bearer '+tok,Accept:'application/json','Content-Type':'application/json','OData-Version':'4.0','OData-MaxVersion':'4.0',...(opt.headers||{})}});
+  if(!r.ok){let msg='';try{const j=await r.json();msg=(j.error&&(j.error.innererror&&j.error.innererror.message||j.error.message))||''}catch(e){}throw new Error('F&O returned '+r.status+(msg?': '+msg:''))}
+  if(r.status===204)return null;
+  const t=await r.text();return t?JSON.parse(t):null;
+}
+const TYPE_TO_FNO={'Transfer Request':'TransferRequest',Wastage:'Wastage',Counting:'Counting'};
+const TYPE_FROM_FNO={TransferRequest:'Transfer Request',Wastage:'Wastage',Counting:'Counting'};
+const q=v=>"'"+String(v).replace(/'/g,"''")+"'";
+const hdrKey=id=>`RBTemplates(dataAreaId=${q(FNO.company)},TemplateId=${q(id)})`;
+const co=()=>'cross-company=true&$filter=dataAreaId eq '+q(FNO.company);
+async function fnoLoad(interactive){
+  fnoState='loading';
+  try{
+    const h=await fnoFetch('RBTemplates?'+co(),{},interactive);
+    const l=await fnoFetch('RBTemplateLines?'+co(),{},interactive);
+    TEMPLATES=h.value.map(t=>({id:t.TemplateId,name:t.TemplateName,type:TYPE_FROM_FNO[t.TemplateType]||t.TemplateType,date:String(t.CreatedDate||'').slice(0,10),
+      lines:l.value.filter(x=>x.TemplateId===t.TemplateId).sort((a,b)=>a.LineNum-b.LineNum).map(x=>({no:x.ItemNo,qty:+x.DefaultQty,name:x.ItemName,unit:x.UnitOfMeasure}))}))
+      .sort((a,b)=>a.id.localeCompare(b.id));
+    fnoState='live';fnoError='';saveState();
+  }catch(e){fnoState=fnoAccount()?'error':'signedout';fnoError=e.message;throw e}
+}
+async function fnoSaveTemplate(tp,isNew){
+  const body={TemplateName:tp.name,TemplateType:TYPE_TO_FNO[tp.type],CreatedDate:(tp.date||TODAY)+'T12:00:00Z'};
+  if(isNew)await fnoFetch('RBTemplates',{method:'POST',body:JSON.stringify({dataAreaId:FNO.company,TemplateId:tp.id,...body})});
+  else await fnoFetch(hdrKey(tp.id),{method:'PATCH',body:JSON.stringify(body)});
+  await fnoDeleteLines(tp.id);
+  let n=1;
+  for(const x of tp.lines){const i=byNo[x.no]||{};
+    await fnoFetch('RBTemplateLines',{method:'POST',body:JSON.stringify({dataAreaId:FNO.company,TemplateId:tp.id,LineNum:n++,ItemNo:x.no,ItemName:i.name||x.name||'',UnitOfMeasure:i.unit||x.unit||'',DefaultQty:+x.qty||0})});}
+}
+async function fnoDeleteLines(id){
+  const old=await fnoFetch('RBTemplateLines?cross-company=true&$filter=dataAreaId eq '+q(FNO.company)+' and TemplateId eq '+q(id));
+  for(const x of old.value)await fnoFetch(`RBTemplateLines(dataAreaId=${q(FNO.company)},TemplateId=${q(id)},LineNum=${x.LineNum})`,{method:'DELETE'});
+}
+async function fnoDeleteTemplate(id){await fnoDeleteLines(id);await fnoFetch(hdrKey(id),{method:'DELETE'})}
+function fnoBar(){
+  const st={off:['neutral','Demo data','F&O connection not set up yet'],signedout:['warn','Not signed in','Sign in with your F&O account to load templates from F&O'],
+    loading:['info','Loading…','Reading templates from F&O'],live:['ok','Live from F&O',`Company ${FNO.company.toUpperCase()} · ${esc((fnoAccount()||{}).username||'')}`],
+    error:['bad','Could not reach F&O',esc(fnoError)]}[fnoState];
+  const btn=fnoState==='off'?'':fnoState==='live'?`<button class="btn sm" id="fnoRefresh">Refresh</button>`:`<button class="btn sm solid" id="fnoSignIn">Sign in with Microsoft</button>`;
+  return `<div class="panel" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 20px"><span class="pill ${st[0]}">${st[1]}</span><span style="color:var(--muted);font-size:13px;flex:1;min-width:200px">${st[2]}</span>${btn}</div>`;
+}
+
 /* ================= Templates ================= */
 const TYPES=['Transfer Request','Wastage','Counting'];
 V.templates=()=>{
   const el=pageEl();
   el.innerHTML=`<div class="page-head"><div><h1>Templates</h1><p>Reusable item lists for transfer requests, wastage and counting. Pick one when creating a new entry.</p></div><div class="actions"><button class="btn solid" id="tNew">${ico('plus')}New template</button></div></div>
+  ${fnoBar()}
+  ${fnoState==='live'&&!TEMPLATES.length?`<div class="panel" style="padding:18px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center"><span style="flex:1;min-width:220px">F&amp;O has no templates yet. Copy the ${DEMO_TEMPLATES.length} demo templates into F&amp;O to get started.</span><button class="btn solid" id="fnoSeed">${ico('save')}Copy demo templates to F&amp;O</button></div>`:''}
   <div class="panel" id="tT"><div class="panel-head"><h3>All templates</h3><span class="hint">Click a row to edit its items</span></div></div>`;
-  const t=dataTable({id:'tpl',rows:()=>TEMPLATES,searchKeys:t=>t.name+t.type+t.lines.map(x=>byNo[x.no].name).join(' '),onRow:editTemplate,cols:[
+  const t=dataTable({id:'tpl',rows:()=>TEMPLATES,searchKeys:t=>t.name+t.type+t.lines.map(x=>(byNo[x.no]||x).name||'').join(' '),onRow:editTemplate,cols:[
     {h:'Template name',v:t=>`<strong>${esc(t.name)}</strong>`,sort:t=>t.name},
     {h:'Template type',v:t=>`<span class="pill ${t.type==='Wastage'?'bad':t.type==='Counting'?'info':'ok'}">${t.type}</span>`,sort:t=>t.type},
     {h:'Items',r:1,v:t=>t.lines.length,sort:t=>t.lines.length},{h:'Created',v:t=>`<span class="num">${fmtD(t.date)}</span>`,sort:t=>t.date},
@@ -436,6 +511,12 @@ V.templates=()=>{
   t.querySelector('.toolbar').appendChild(chipsFilter(t,['All',...TYPES],(x,v)=>x.type===v));
   el.querySelector('#tT').appendChild(t);
   el.querySelector('#tNew').onclick=()=>editTemplate(null);
+  const reload=interactive=>{fnoState='loading';render();fnoLoad(interactive).then(()=>render(),e=>{render();toast(e.message)})};
+  el.querySelector('#fnoSignIn')?.addEventListener('click',()=>reload(true));
+  el.querySelector('#fnoRefresh')?.addEventListener('click',()=>reload(false));
+  el.querySelector('#fnoSeed')?.addEventListener('click',async e=>{e.target.disabled=true;e.target.textContent='Copying…';
+    try{for(const tp of DEMO_TEMPLATES)await fnoSaveTemplate(tp,true);await fnoLoad(false);toast(DEMO_TEMPLATES.length+' templates copied to F&O');render()}catch(err){toast(err.message);render()}});
+  if(fnoState==='signedout'&&fnoAccount()&&!el.dataset.tried){el.dataset.tried=1;setTimeout(()=>reload(false),0)}
   return el;
 };
 function editTemplate(tp){
@@ -449,11 +530,17 @@ function editTemplate(tp){
   const le=lineEditor(m.el.querySelector('#tLines'),{type:null,qtyLabel:'Default quantity'});
   if(tp)le.set(tp.lines);
   const delBtn=m.el.querySelector('#tDel');
-  if(delBtn)delBtn.onclick=()=>{if(delBtn.dataset.sure){TEMPLATES=TEMPLATES.filter(x=>x!==tp);m.close();toast('Template deleted');go(cur)}else{delBtn.dataset.sure=1;delBtn.innerHTML=ico('trash')+'Click again to delete'}};
-  m.el.querySelector('#tSave').onclick=()=>{const name=m.el.querySelector('#tName').value.trim(),type=m.el.querySelector('#tType').value,lines=le.get(),err=m.el.querySelector('#tErr');
+  if(delBtn)delBtn.onclick=async()=>{if(!delBtn.dataset.sure){delBtn.dataset.sure=1;delBtn.innerHTML=ico('trash')+'Click again to delete';return}
+    if(fnoState==='live'){delBtn.disabled=true;try{await fnoDeleteTemplate(tp.id);await fnoLoad(false)}catch(e){m.el.querySelector('#tErr').textContent=e.message;delBtn.disabled=false;return}}
+    else TEMPLATES=TEMPLATES.filter(x=>x!==tp);
+    m.close();toast('Template deleted');go(cur)};
+  m.el.querySelector('#tSave').onclick=async()=>{const name=m.el.querySelector('#tName').value.trim(),type=m.el.querySelector('#tType').value,lines=le.get(),err=m.el.querySelector('#tErr');
     if(!name){err.textContent='Enter a template name.';return}if(!lines.length){err.textContent='Add at least one item.';return}
-    if(tp)Object.assign(tp,{name,type,lines});else TEMPLATES.unshift({id:nextNo(TEMPLATES,'id','TPL-',3),name,type,date:TODAY,lines});
-    m.close();toast(`Template “${name}” saved`);go(cur)};
+    const rec=tp?{...tp,name,type,lines}:{id:nextNo(TEMPLATES,'id','TPL-',3),name,type,date:TODAY,lines};
+    if(fnoState==='live'){const b=m.el.querySelector('#tSave');b.disabled=true;b.textContent='Saving to F&O…';
+      try{await fnoSaveTemplate(rec,!tp);await fnoLoad(false)}catch(e){err.textContent=e.message;b.disabled=false;b.innerHTML=ico('save')+'Save template';return}}
+    else if(tp)Object.assign(tp,rec);else TEMPLATES.unshift(rec);
+    m.close();toast(`Template “${name}” saved${fnoState==='live'?' to F&O':''}`);go(cur)};
 }
 
 /* ================= Page shell ================= */
