@@ -435,7 +435,8 @@ function fnoMsal(){
   if(!fnoConfigured()||!window.msal)return null;
   if(!msalApp){
     msalApp=new msal.PublicClientApplication({auth:{clientId:FNO.clientId,authority:'https://login.microsoftonline.com/'+FNO.tenantId,redirectUri:new URL('auth.html',location.href).href},cache:{cacheLocation:'localStorage'}});
-    msalReady=Promise.resolve();
+    /* finishes or clears any half-done redirect sign-in, so a new attempt isn't blocked */
+    msalReady=msalApp.handleRedirectPromise().catch(()=>null);
   }
   return msalApp;
 }
