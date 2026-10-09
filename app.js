@@ -436,7 +436,10 @@ function fnoMsal(){
   if(!msalApp){
     msalApp=new msal.PublicClientApplication({auth:{clientId:FNO.clientId,authority:'https://login.microsoftonline.com/'+FNO.tenantId,redirectUri:new URL('auth.html',location.href).href},cache:{cacheLocation:'localStorage'}});
     /* finishes or clears any half-done redirect sign-in, so a new attempt isn't blocked */
-    msalReady=msalApp.handleRedirectPromise().catch(()=>null);
+    msalReady=msalApp.handleRedirectPromise().then(r=>{
+      if(r&&r.account&&cur==='templates'&&fnoState!=='live'){fnoState='loading';render();fnoLoad(false).then(render,render)}
+      return r;
+    }).catch(()=>null);
   }
   return msalApp;
 }
@@ -468,13 +471,13 @@ async function fnoFetch(path,opt={},interactive=false){
 const TYPE_TO_FNO={'Transfer Request':'TransferRequest',Wastage:'Wastage',Counting:'Counting'};
 const TYPE_FROM_FNO={TransferRequest:'Transfer Request',Wastage:'Wastage',Counting:'Counting'};
 const q=v=>"'"+String(v).replace(/'/g,"''")+"'";
-const hdrKey=id=>`RBTemplates(dataAreaId=${q(FNO.company)},TemplateId=${q(id)})`;
-const co=()=>'cross-company=true&$filter=dataAreaId eq '+q(FNO.company);
+/* the entities work in the signed-in user's default company (USMF) */
+const hdrKey=id=>`RBTemplates(TemplateId=${q(id)})`;
 async function fnoLoad(interactive){
   fnoState='loading';
   try{
-    const h=await fnoFetch('RBTemplates?'+co(),{},interactive);
-    const l=await fnoFetch('RBTemplateLines?'+co(),{},interactive);
+    const h=await fnoFetch('RBTemplates',{},interactive);
+    const l=await fnoFetch('RBTemplateLines',{},interactive);
     TEMPLATES=h.value.map(t=>({id:t.TemplateId,name:t.TemplateName,type:TYPE_FROM_FNO[t.TemplateType]||t.TemplateType,date:String(t.CreatedDate||'').slice(0,10),
       lines:l.value.filter(x=>x.TemplateId===t.TemplateId).sort((a,b)=>a.LineNum-b.LineNum).map(x=>({no:x.ItemNo,qty:+x.DefaultQty,name:x.ItemName,unit:x.UnitOfMeasure}))}))
       .sort((a,b)=>a.id.localeCompare(b.id));
@@ -483,16 +486,16 @@ async function fnoLoad(interactive){
 }
 async function fnoSaveTemplate(tp,isNew){
   const body={TemplateName:tp.name,TemplateType:TYPE_TO_FNO[tp.type],CreatedDate:(tp.date||TODAY)+'T12:00:00Z'};
-  if(isNew)await fnoFetch('RBTemplates',{method:'POST',body:JSON.stringify({dataAreaId:FNO.company,TemplateId:tp.id,...body})});
+  if(isNew)await fnoFetch('RBTemplates',{method:'POST',body:JSON.stringify({TemplateId:tp.id,...body})});
   else await fnoFetch(hdrKey(tp.id),{method:'PATCH',body:JSON.stringify(body)});
   await fnoDeleteLines(tp.id);
   let n=1;
   for(const x of tp.lines){const i=byNo[x.no]||{};
-    await fnoFetch('RBTemplateLines',{method:'POST',body:JSON.stringify({dataAreaId:FNO.company,TemplateId:tp.id,LineNum:n++,ItemNo:x.no,ItemName:i.name||x.name||'',UnitOfMeasure:i.unit||x.unit||'',DefaultQty:+x.qty||0})});}
+    await fnoFetch('RBTemplateLines',{method:'POST',body:JSON.stringify({TemplateId:tp.id,LineNum:n++,ItemNo:x.no,ItemName:i.name||x.name||'',UnitOfMeasure:i.unit||x.unit||'',DefaultQty:+x.qty||0})});}
 }
 async function fnoDeleteLines(id){
-  const old=await fnoFetch('RBTemplateLines?cross-company=true&$filter=dataAreaId eq '+q(FNO.company)+' and TemplateId eq '+q(id));
-  for(const x of old.value)await fnoFetch(`RBTemplateLines(dataAreaId=${q(FNO.company)},TemplateId=${q(id)},LineNum=${x.LineNum})`,{method:'DELETE'});
+  const old=await fnoFetch('RBTemplateLines?$filter=TemplateId eq '+q(id));
+  for(const x of old.value)await fnoFetch(`RBTemplateLines(TemplateId=${q(id)},LineNum=${x.LineNum})`,{method:'DELETE'});
 }
 async function fnoDeleteTemplate(id){await fnoDeleteLines(id);await fnoFetch(hdrKey(id),{method:'DELETE'})}
 function fnoBar(){

@@ -16,7 +16,8 @@ if (!window.opener && window.msal) {
   var app = new msal.PublicClientApplication({
     auth: { clientId: '7cca2278-8039-4a6a-8e85-4eaa5deba75e',
             authority: 'https://login.microsoftonline.com/4661aaa7-3476-4224-9d3d-ca650e868c0a',
-            redirectUri: new URL('auth.html', location.href).href },
+            redirectUri: new URL('auth.html', location.href).href,
+            navigateToLoginRequestUrl: false },
     cache: { cacheLocation: 'localStorage' }
   });
   app.handleRedirectPromise()
